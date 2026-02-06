@@ -3,9 +3,15 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -15,20 +21,20 @@ import (
 )
 
 type MemberadditionaliplistIpv6NetworkSettingModel struct {
-	Enabled                 types.Bool   `tfsdk:"enabled"`
-	VirtualIp               types.String `tfsdk:"virtual_ip"`
-	CidrPrefix              types.Int64  `tfsdk:"cidr_prefix"`
-	Gateway                 types.String `tfsdk:"gateway"`
-	AutoRouterConfigEnabled types.Bool   `tfsdk:"auto_router_config_enabled"`
-	VlanId                  types.Int64  `tfsdk:"vlan_id"`
-	Primary                 types.Bool   `tfsdk:"primary"`
-	Dscp                    types.Int64  `tfsdk:"dscp"`
-	UseDscp                 types.Bool   `tfsdk:"use_dscp"`
+	Enabled                 types.Bool          `tfsdk:"enabled"`
+	VirtualIp               iptypes.IPv6Address `tfsdk:"virtual_ip"`
+	CidrPrefix              types.Int64         `tfsdk:"cidr_prefix"`
+	Gateway                 types.String        `tfsdk:"gateway"`
+	AutoRouterConfigEnabled types.Bool          `tfsdk:"auto_router_config_enabled"`
+	VlanId                  types.Int64         `tfsdk:"vlan_id"`
+	Primary                 types.Bool          `tfsdk:"primary"`
+	Dscp                    types.Int64         `tfsdk:"dscp"`
+	UseDscp                 types.Bool          `tfsdk:"use_dscp"`
 }
 
 var MemberadditionaliplistIpv6NetworkSettingAttrTypes = map[string]attr.Type{
 	"enabled":                    types.BoolType,
-	"virtual_ip":                 types.StringType,
+	"virtual_ip":                 iptypes.IPv6AddressType{},
 	"cidr_prefix":                types.Int64Type,
 	"gateway":                    types.StringType,
 	"auto_router_config_enabled": types.BoolType,
@@ -44,6 +50,8 @@ var MemberadditionaliplistIpv6NetworkSettingResourceSchemaAttributes = map[strin
 		MarkdownDescription: "Determines if IPv6 networking should be enabled.",
 	},
 	"virtual_ip": schema.StringAttribute{
+		CustomType:          iptypes.IPv6AddressType{},
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "IPv6 address.",
 	},
@@ -52,6 +60,7 @@ var MemberadditionaliplistIpv6NetworkSettingResourceSchemaAttributes = map[strin
 		MarkdownDescription: "IPv6 cidr prefix",
 	},
 	"gateway": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Gateway address.",
 	},
@@ -65,14 +74,23 @@ var MemberadditionaliplistIpv6NetworkSettingResourceSchemaAttributes = map[strin
 	},
 	"primary": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(0),
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
+		},
 		MarkdownDescription: "The DSCP (Differentiated Services Code Point) value determines relative priorities for the type of services on your network. The appliance implements QoS (Quality of Service) rules based on this configuration. Valid values are from 0 to 63.",
 	},
 	"use_dscp": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }
@@ -95,7 +113,7 @@ func (m *MemberadditionaliplistIpv6NetworkSettingModel) Expand(ctx context.Conte
 	}
 	to := &grid.MemberadditionaliplistIpv6NetworkSetting{
 		Enabled:                 flex.ExpandBoolPointer(m.Enabled),
-		VirtualIp:               flex.ExpandStringPointer(m.VirtualIp),
+		VirtualIp:               flex.ExpandIPv6Address(m.VirtualIp),
 		CidrPrefix:              flex.ExpandInt64Pointer(m.CidrPrefix),
 		Gateway:                 flex.ExpandStringPointer(m.Gateway),
 		AutoRouterConfigEnabled: flex.ExpandBoolPointer(m.AutoRouterConfigEnabled),
@@ -126,7 +144,7 @@ func (m *MemberadditionaliplistIpv6NetworkSettingModel) Flatten(ctx context.Cont
 		*m = MemberadditionaliplistIpv6NetworkSettingModel{}
 	}
 	m.Enabled = types.BoolPointerValue(from.Enabled)
-	m.VirtualIp = flex.FlattenStringPointer(from.VirtualIp)
+	m.VirtualIp = flex.FlattenIPv6Address(from.VirtualIp)
 	m.CidrPrefix = flex.FlattenInt64Pointer(from.CidrPrefix)
 	m.Gateway = flex.FlattenStringPointer(from.Gateway)
 	m.AutoRouterConfigEnabled = types.BoolPointerValue(from.AutoRouterConfigEnabled)

@@ -6,12 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MembertrafficcapturerecdnssettingKpiMonitoredDomainsModel struct {
@@ -26,10 +28,15 @@ var MembertrafficcapturerecdnssettingKpiMonitoredDomainsAttrTypes = map[string]a
 
 var MembertrafficcapturerecdnssettingKpiMonitoredDomainsResourceSchemaAttributes = map[string]schema.Attribute{
 	"domain_name": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.IsValidFQDN(),
+		},
 		MarkdownDescription: "Domain name (FQDN to Query).",
 	},
 	"record_type": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Record type(record to query).",
 	},

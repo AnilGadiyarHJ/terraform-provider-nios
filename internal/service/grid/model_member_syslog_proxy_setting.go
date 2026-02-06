@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -17,52 +19,63 @@ import (
 )
 
 type MemberSyslogProxySettingModel struct {
-	Enable     types.Bool  `tfsdk:"enable"`
-	TcpEnable  types.Bool  `tfsdk:"tcp_enable"`
-	TcpPort    types.Int64 `tfsdk:"tcp_port"`
-	UdpEnable  types.Bool  `tfsdk:"udp_enable"`
-	UdpPort    types.Int64 `tfsdk:"udp_port"`
+	Enable    types.Bool  `tfsdk:"enable"`
+	TcpEnable types.Bool  `tfsdk:"tcp_enable"`
+	TcpPort   types.Int64 `tfsdk:"tcp_port"`
+	UdpEnable types.Bool  `tfsdk:"udp_enable"`
+	UdpPort   types.Int64 `tfsdk:"udp_port"`
 	ClientAcls types.List  `tfsdk:"client_acls"`
 }
 
 var MemberSyslogProxySettingAttrTypes = map[string]attr.Type{
-	"enable":      types.BoolType,
-	"tcp_enable":  types.BoolType,
-	"tcp_port":    types.Int64Type,
-	"udp_enable":  types.BoolType,
-	"udp_port":    types.Int64Type,
+	"enable":     types.BoolType,
+	"tcp_enable": types.BoolType,
+	"tcp_port":   types.Int64Type,
+	"udp_enable": types.BoolType,
+	"udp_port":   types.Int64Type,
 	"client_acls": types.ListType{ElemType: types.ObjectType{AttrTypes: MembersyslogproxysettingClientAclsAttrTypes}},
 }
 
 var MemberSyslogProxySettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If set to True, the member receives syslog messages from specified devices, such as syslog servers and routers, and then forwards these messages to an external syslog server.",
 	},
 	"tcp_enable": schema.BoolAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(false), wapi bug - https://infoblox.atlassian.net/browse/NIOS-109166
 		MarkdownDescription: "If set to True, the appliance can receive messages from other devices via TCP.",
 	},
 	"tcp_port": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(514),
 		MarkdownDescription: "The TCP port the appliance must listen on.",
 	},
 	"udp_enable": schema.BoolAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		//Default:             booldefault.StaticBool(false), wapi bug - https://infoblox.atlassian.net/browse/NIOS-109166
 		MarkdownDescription: "If set to True, the appliance can receive messages from other devices via UDP.",
 	},
 	"udp_port": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(514),
 		MarkdownDescription: "The UDP port the appliance must listen on.",
 	},
 	"client_acls": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MembersyslogproxysettingClientAclsResourceSchemaAttributes,
 		},
+		Computed: true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "This list controls the IP addresses and networks that are allowed to access the syslog proxy.",
 	},
 }
@@ -84,11 +97,11 @@ func (m *MemberSyslogProxySettingModel) Expand(ctx context.Context, diags *diag.
 		return nil
 	}
 	to := &grid.MemberSyslogProxySetting{
-		Enable:     flex.ExpandBoolPointer(m.Enable),
-		TcpEnable:  flex.ExpandBoolPointer(m.TcpEnable),
-		TcpPort:    flex.ExpandInt64Pointer(m.TcpPort),
-		UdpEnable:  flex.ExpandBoolPointer(m.UdpEnable),
-		UdpPort:    flex.ExpandInt64Pointer(m.UdpPort),
+		Enable:    flex.ExpandBoolPointer(m.Enable),
+		TcpEnable: flex.ExpandBoolPointer(m.TcpEnable),
+		TcpPort:   flex.ExpandInt64Pointer(m.TcpPort),
+		UdpEnable: flex.ExpandBoolPointer(m.UdpEnable),
+		UdpPort:   flex.ExpandInt64Pointer(m.UdpPort),
 		ClientAcls: flex.ExpandFrameworkListNestedBlock(ctx, m.ClientAcls, diags, ExpandMembersyslogproxysettingClientAcls),
 	}
 	return to

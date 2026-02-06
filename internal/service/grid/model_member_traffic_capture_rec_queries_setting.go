@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -29,6 +30,8 @@ var MemberTrafficCaptureRecQueriesSettingAttrTypes = map[string]attr.Type{
 var MemberTrafficCaptureRecQueriesSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"recursive_clients_count_trigger_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable triggering automated traffic capture based on outgoing recursive queries count.",
 	},
 	"recursive_clients_count_threshold": schema.Int64Attribute{

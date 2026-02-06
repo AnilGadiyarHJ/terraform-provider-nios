@@ -3,9 +3,11 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -15,18 +17,18 @@ import (
 )
 
 type MembernodeinfoLanHaPortSettingModel struct {
-	MgmtLan          types.String `tfsdk:"mgmt_lan"`
-	MgmtIpv6addr     types.String `tfsdk:"mgmt_ipv6addr"`
-	HaIpAddress      types.String `tfsdk:"ha_ip_address"`
-	LanPortSetting   types.Object `tfsdk:"lan_port_setting"`
-	HaPortSetting    types.Object `tfsdk:"ha_port_setting"`
-	HaCloudAttribute types.String `tfsdk:"ha_cloud_attribute"`
+	MgmtLan          iptypes.IPv4Address `tfsdk:"mgmt_lan"`
+	MgmtIpv6addr     iptypes.IPv6Address `tfsdk:"mgmt_ipv6addr"`
+	HaIpAddress      iptypes.IPAddress   `tfsdk:"ha_ip_address"`
+	LanPortSetting   types.Object        `tfsdk:"lan_port_setting"`
+	HaPortSetting    types.Object        `tfsdk:"ha_port_setting"`
+	HaCloudAttribute types.String        `tfsdk:"ha_cloud_attribute"`
 }
 
 var MembernodeinfoLanHaPortSettingAttrTypes = map[string]attr.Type{
-	"mgmt_lan":           types.StringType,
-	"mgmt_ipv6addr":      types.StringType,
-	"ha_ip_address":      types.StringType,
+	"mgmt_lan":           iptypes.IPv4AddressType{},
+	"mgmt_ipv6addr":      iptypes.IPv6AddressType{},
+	"ha_ip_address":      iptypes.IPAddressType{},
 	"lan_port_setting":   types.ObjectType{AttrTypes: MembernodeinfolanhaportsettingLanPortSettingAttrTypes},
 	"ha_port_setting":    types.ObjectType{AttrTypes: MembernodeinfolanhaportsettingHaPortSettingAttrTypes},
 	"ha_cloud_attribute": types.StringType,
@@ -34,27 +36,38 @@ var MembernodeinfoLanHaPortSettingAttrTypes = map[string]attr.Type{
 
 var MembernodeinfoLanHaPortSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"mgmt_lan": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Public IPv4 address for the LAN1 interface.",
 	},
 	"mgmt_ipv6addr": schema.StringAttribute{
+		CustomType:          iptypes.IPv6AddressType{},
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Public IPv6 address for the LAN1 interface.",
 	},
 	"ha_ip_address": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "HA IP address.",
 	},
 	"lan_port_setting": schema.SingleNestedAttribute{
-		Attributes: MembernodeinfolanhaportsettingLanPortSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MembernodeinfolanhaportsettingLanPortSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "Physical port settings for the LAN interface.",
 	},
 	"ha_port_setting": schema.SingleNestedAttribute{
-		Attributes: MembernodeinfolanhaportsettingHaPortSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MembernodeinfolanhaportsettingHaPortSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "Physical port settings for the HA interface.",
 	},
 	"ha_cloud_attribute": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString("UNK"),
 		MarkdownDescription: "HA cloud interface from cloud platform side.",
 	},
 }
@@ -76,9 +89,9 @@ func (m *MembernodeinfoLanHaPortSettingModel) Expand(ctx context.Context, diags 
 		return nil
 	}
 	to := &grid.MembernodeinfoLanHaPortSetting{
-		MgmtLan:          flex.ExpandStringPointer(m.MgmtLan),
-		MgmtIpv6addr:     flex.ExpandStringPointer(m.MgmtIpv6addr),
-		HaIpAddress:      flex.ExpandStringPointer(m.HaIpAddress),
+		MgmtLan:          flex.ExpandIPv4Address(m.MgmtLan),
+		MgmtIpv6addr:     flex.ExpandIPv6Address(m.MgmtIpv6addr),
+		HaIpAddress:      flex.ExpandIPAddress(m.HaIpAddress),
 		LanPortSetting:   ExpandMembernodeinfolanhaportsettingLanPortSetting(ctx, m.LanPortSetting, diags),
 		HaPortSetting:    ExpandMembernodeinfolanhaportsettingHaPortSetting(ctx, m.HaPortSetting, diags),
 		HaCloudAttribute: flex.ExpandStringPointer(m.HaCloudAttribute),
@@ -104,9 +117,9 @@ func (m *MembernodeinfoLanHaPortSettingModel) Flatten(ctx context.Context, from 
 	if m == nil {
 		*m = MembernodeinfoLanHaPortSettingModel{}
 	}
-	m.MgmtLan = flex.FlattenStringPointer(from.MgmtLan)
-	m.MgmtIpv6addr = flex.FlattenStringPointer(from.MgmtIpv6addr)
-	m.HaIpAddress = flex.FlattenStringPointer(from.HaIpAddress)
+	m.MgmtLan = flex.FlattenIPv4Address(from.MgmtLan)
+	m.MgmtIpv6addr = flex.FlattenIPv6Address(from.MgmtIpv6addr)
+	m.HaIpAddress = flex.FlattenIPAddress(from.HaIpAddress)
 	m.LanPortSetting = FlattenMembernodeinfolanhaportsettingLanPortSetting(ctx, from.LanPortSetting, diags)
 	m.HaPortSetting = FlattenMembernodeinfolanhaportsettingHaPortSetting(ctx, from.HaPortSetting, diags)
 	m.HaCloudAttribute = flex.FlattenStringPointer(from.HaCloudAttribute)

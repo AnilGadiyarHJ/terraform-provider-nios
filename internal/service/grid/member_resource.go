@@ -36,7 +36,7 @@ func (r *MemberResource) Metadata(ctx context.Context, req resource.MetadataRequ
 
 func (r *MemberResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "",
+		MarkdownDescription: "Manages a Member resource object.",
 		Attributes:          MemberResourceSchemaAttributes,
 	}
 }
@@ -127,7 +127,6 @@ func (r *MemberResource) Read(ctx context.Context, req resource.ReadRequest, res
 		Read(ctx, utils.ExtractResourceRef(data.Ref.ValueString())).
 		ReturnFieldsPlus(readableAttributesForMember).
 		ReturnAsObject(1).
-		// ProxySearch(config.GetProxySearch()).
 		Execute()
 
 	// If the resource is not found, try searching using Extensible Attributes
@@ -204,7 +203,6 @@ func (r *MemberResource) ReadByExtAttrs(ctx context.Context, data *MemberModel, 
 		Extattrfilter(idMap).
 		ReturnAsObject(1).
 		ReturnFieldsPlus(readableAttributesForMember).
-		// ProxySearch(config.GetProxySearch()).
 		Execute()
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Member by extattrs, got error: %s", err))
@@ -224,6 +222,7 @@ func (r *MemberResource) ReadByExtAttrs(ctx context.Context, data *MemberModel, 
 	// Remove inherited external attributes from extattrs
 	res.ExtAttrs, data.ExtAttrsAll, diags = RemoveInheritedExtAttrs(ctx, data.ExtAttrs, *res.ExtAttrs)
 	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return true
 	}
 

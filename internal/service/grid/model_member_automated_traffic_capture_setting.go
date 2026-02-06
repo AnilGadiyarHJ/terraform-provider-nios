@@ -3,9 +3,13 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -43,10 +47,17 @@ var MemberAutomatedTrafficCaptureSettingAttrTypes = map[string]attr.Type{
 var MemberAutomatedTrafficCaptureSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"traffic_capture_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable automated traffic capture based on monitoring thresholds.",
 	},
 	"destination": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("NONE"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("FTP", "NONE", "SCP"),
+		},
 		MarkdownDescription: "Destination of traffic capture files. Save traffic capture locally or upload to remote server using FTP or SCP.",
 	},
 	"duration": schema.Int64Attribute{
@@ -55,29 +66,38 @@ var MemberAutomatedTrafficCaptureSettingResourceSchemaAttributes = map[string]sc
 	},
 	"include_support_bundle": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable automatic download for support bundle.",
 	},
 	"keep_local_copy": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Save traffic capture files locally.",
 	},
 	"destination_host": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "IP Address of the destination host.",
 	},
 	"traffic_capture_directory": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Directory to store the traffic capture files on the remote server.",
 	},
 	"support_bundle_directory": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Directory to store the support bundle on the remote server.",
 	},
 	"username": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "User name for accessing the FTP/SCP server.",
 	},
 	"password": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Password for accessing the FTP/SCP server. This field is not readable.",
 	},
@@ -141,5 +161,4 @@ func (m *MemberAutomatedTrafficCaptureSettingModel) Flatten(ctx context.Context,
 	m.TrafficCaptureDirectory = flex.FlattenStringPointer(from.TrafficCaptureDirectory)
 	m.SupportBundleDirectory = flex.FlattenStringPointer(from.SupportBundleDirectory)
 	m.Username = flex.FlattenStringPointer(from.Username)
-	m.Password = flex.FlattenStringPointer(from.Password)
 }

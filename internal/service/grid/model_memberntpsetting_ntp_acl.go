@@ -32,6 +32,7 @@ var MemberntpsettingNtpAclAttrTypes = map[string]attr.Type{
 
 var MemberntpsettingNtpAclResourceSchemaAttributes = map[string]schema.Attribute{
 	"acl_type": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The NTP access control list type.",
 	},
@@ -39,17 +40,19 @@ var MemberntpsettingNtpAclResourceSchemaAttributes = map[string]schema.Attribute
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberntpsettingntpaclAcListResourceSchemaAttributes,
 		},
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "The list of NTP access control items.",
 	},
 	"named_acl": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The NTP access named ACL.",
 	},
 	"service": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The type of service with access control for the assigned named ACL.",
 	},

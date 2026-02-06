@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -29,6 +30,8 @@ var MemberTrafficCaptureQpsSettingAttrTypes = map[string]attr.Type{
 var MemberTrafficCaptureQpsSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"qps_trigger_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable triggering automated traffic capture based on DNS queries per second threshold.",
 	},
 	"qps_threshold": schema.Int64Attribute{

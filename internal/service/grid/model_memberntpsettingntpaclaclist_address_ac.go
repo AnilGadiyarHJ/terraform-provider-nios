@@ -26,10 +26,12 @@ var MemberntpsettingntpaclaclistAddressAcAttrTypes = map[string]attr.Type{
 
 var MemberntpsettingntpaclaclistAddressAcResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The address this rule applies to or \"Any\".",
 	},
 	"permission": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The permission to use for this address.",
 	},

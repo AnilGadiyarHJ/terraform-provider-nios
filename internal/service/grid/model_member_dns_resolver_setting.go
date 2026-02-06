@@ -29,18 +29,18 @@ var MemberDnsResolverSettingAttrTypes = map[string]attr.Type{
 var MemberDnsResolverSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"resolvers": schema.ListAttribute{
 		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "The resolvers of a Grid member. The Grid member sends queries to the first name server address in the list. The second name server address is used if first one does not response.",
 	},
 	"search_domains": schema.ListAttribute{
 		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "The Search Domain Group, which is a group of domain names that the Infoblox device can add to partial queries that do not specify a domain name. Note that you can set this parameter only when prefer_resolver or alternate_resolver is set.",
 	},
 }

@@ -28,8 +28,11 @@ var MemberntpsettingntpaclAcListResourceSchemaAttributes = map[string]schema.Att
 	"address_ac": schema.SingleNestedAttribute{
 		Attributes: MemberntpsettingntpaclaclistAddressAcResourceSchemaAttributes,
 		Optional:   true,
+		// TODO: Generator could not find a description for this field.
+		MarkdownDescription: "",
 	},
 	"service": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The type of service with access control.",
 	},

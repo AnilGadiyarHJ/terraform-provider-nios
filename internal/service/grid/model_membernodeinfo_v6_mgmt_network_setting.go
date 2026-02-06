@@ -3,9 +3,13 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -15,20 +19,20 @@ import (
 )
 
 type MembernodeinfoV6MgmtNetworkSettingModel struct {
-	Enabled                 types.Bool   `tfsdk:"enabled"`
-	VirtualIp               types.String `tfsdk:"virtual_ip"`
-	CidrPrefix              types.Int64  `tfsdk:"cidr_prefix"`
-	Gateway                 types.String `tfsdk:"gateway"`
-	AutoRouterConfigEnabled types.Bool   `tfsdk:"auto_router_config_enabled"`
-	VlanId                  types.Int64  `tfsdk:"vlan_id"`
-	Primary                 types.Bool   `tfsdk:"primary"`
-	Dscp                    types.Int64  `tfsdk:"dscp"`
-	UseDscp                 types.Bool   `tfsdk:"use_dscp"`
+	Enabled                 types.Bool          `tfsdk:"enabled"`
+	VirtualIp               iptypes.IPv6Address `tfsdk:"virtual_ip"`
+	CidrPrefix              types.Int64         `tfsdk:"cidr_prefix"`
+	Gateway                 types.String        `tfsdk:"gateway"`
+	AutoRouterConfigEnabled types.Bool          `tfsdk:"auto_router_config_enabled"`
+	VlanId                  types.Int64         `tfsdk:"vlan_id"`
+	Primary                 types.Bool          `tfsdk:"primary"`
+	Dscp                    types.Int64         `tfsdk:"dscp"`
+	UseDscp                 types.Bool          `tfsdk:"use_dscp"`
 }
 
 var MembernodeinfoV6MgmtNetworkSettingAttrTypes = map[string]attr.Type{
 	"enabled":                    types.BoolType,
-	"virtual_ip":                 types.StringType,
+	"virtual_ip":                 iptypes.IPv6AddressType{},
 	"cidr_prefix":                types.Int64Type,
 	"gateway":                    types.StringType,
 	"auto_router_config_enabled": types.BoolType,
@@ -41,38 +45,53 @@ var MembernodeinfoV6MgmtNetworkSettingAttrTypes = map[string]attr.Type{
 var MembernodeinfoV6MgmtNetworkSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if IPv6 networking should be enabled.",
 	},
 	"virtual_ip": schema.StringAttribute{
-		Optional:            true,
+		CustomType:          iptypes.IPv6AddressType{},
+		Computed:            true,
 		MarkdownDescription: "IPv6 address.",
 	},
 	"cidr_prefix": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "IPv6 cidr prefix",
 	},
 	"gateway": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Gateway address.",
 	},
 	"auto_router_config_enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Determines if automatic router configuration should be enabled.",
 	},
 	"vlan_id": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The identifier for the VLAN. Valid values are from 1 to 4096.",
 	},
 	"primary": schema.BoolAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		// Default:             booldefault.StaticBool(true), - wapi bug https://infoblox.atlassian.net/browse/NIOS-109167
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		// Default:  int64default.StaticInt64(0), - wapi bug https://infoblox.atlassian.net/browse/NIOS-109167
+		Validators: []validator.Int64{
+			int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
+		},
 		MarkdownDescription: "The DSCP (Differentiated Services Code Point) value determines relative priorities for the type of services on your network. The appliance implements QoS (Quality of Service) rules based on this configuration. Valid values are from 0 to 63.",
 	},
 	"use_dscp": schema.BoolAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		// Default:             booldefault.StaticBool(false), - wapi bug https://infoblox.atlassian.net/browse/NIOS-109167
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }
@@ -95,7 +114,7 @@ func (m *MembernodeinfoV6MgmtNetworkSettingModel) Expand(ctx context.Context, di
 	}
 	to := &grid.MembernodeinfoV6MgmtNetworkSetting{
 		Enabled:                 flex.ExpandBoolPointer(m.Enabled),
-		VirtualIp:               flex.ExpandStringPointer(m.VirtualIp),
+		VirtualIp:               flex.ExpandIPv6Address(m.VirtualIp),
 		CidrPrefix:              flex.ExpandInt64Pointer(m.CidrPrefix),
 		Gateway:                 flex.ExpandStringPointer(m.Gateway),
 		AutoRouterConfigEnabled: flex.ExpandBoolPointer(m.AutoRouterConfigEnabled),
@@ -126,7 +145,7 @@ func (m *MembernodeinfoV6MgmtNetworkSettingModel) Flatten(ctx context.Context, f
 		*m = MembernodeinfoV6MgmtNetworkSettingModel{}
 	}
 	m.Enabled = types.BoolPointerValue(from.Enabled)
-	m.VirtualIp = flex.FlattenStringPointer(from.VirtualIp)
+	m.VirtualIp = flex.FlattenIPv6Address(from.VirtualIp)
 	m.CidrPrefix = flex.FlattenInt64Pointer(from.CidrPrefix)
 	m.Gateway = flex.FlattenStringPointer(from.Gateway)
 	m.AutoRouterConfigEnabled = types.BoolPointerValue(from.AutoRouterConfigEnabled)

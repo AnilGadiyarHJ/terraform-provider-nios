@@ -4,9 +4,12 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -37,6 +40,8 @@ var MemberTrafficCaptureRecDnsSettingAttrTypes = map[string]attr.Type{
 var MemberTrafficCaptureRecDnsSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"rec_dns_latency_trigger_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable triggering automated traffic capture based on recursive DNS latency.",
 	},
 	"rec_dns_latency_threshold": schema.Int64Attribute{
@@ -48,10 +53,16 @@ var MemberTrafficCaptureRecDnsSettingResourceSchemaAttributes = map[string]schem
 		MarkdownDescription: "Recursive DNS latency above which traffic capture will be stopped.",
 	},
 	"rec_dns_latency_listen_on_source": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("VIP_V4"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("IP", "LAN2_V4", "LAN2_V6", "MGMT_V4", "MGMT_V6", "VIP_V4", "VIP_V6"),
+		},
 		MarkdownDescription: "The local IP DNS service is listen on ( for recursive DNS latency trigger).",
 	},
 	"rec_dns_latency_listen_on_ip": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The DNS listen-on IP address used if rec_dns_latency_listen_on_source is IP.",
 	},
@@ -59,10 +70,11 @@ var MemberTrafficCaptureRecDnsSettingResourceSchemaAttributes = map[string]schem
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MembertrafficcapturerecdnssettingKpiMonitoredDomainsResourceSchemaAttributes,
 		},
+		Computed: true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "List of domains monitored by 'Recursive DNS Latency Threshold' trigger.",
 	},
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MemberSnmpSettingModel struct {
@@ -50,87 +51,95 @@ var MemberSnmpSettingAttrTypes = map[string]attr.Type{
 
 var MemberSnmpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"engine_id": schema.ListAttribute{
-		ElementType: types.StringType,
-		Validators: []validator.List{
-			listvalidator.SizeAtLeast(1),
-		},
+		ElementType:         types.StringType,
 		Computed:            true,
 		MarkdownDescription: "The engine ID of the appliance that manages the SNMP agent.",
 	},
 	"queries_community_string": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The community string for SNMP queries.",
 	},
 	"queries_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set to True, SNMP queries are enabled.",
 	},
 	"snmpv3_queries_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set to True, SNMPv3 queries are enabled.",
 	},
 	"snmpv3_queries_users": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MembersnmpsettingSnmpv3QueriesUsersResourceSchemaAttributes,
 		},
+		Computed: true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "A list of SNMPv3 queries users.",
 	},
 	"snmpv3_traps_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set to True, SNMPv3 traps are enabled.",
 	},
 	"syscontact": schema.ListAttribute{
 		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "The name of the contact person for the appliance. Second value is applicable only for HA pair. Otherwise second value is ignored.",
 	},
 	"sysdescr": schema.ListAttribute{
 		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "Useful information about the appliance. Second value is applicable only for HA pair. Otherwise second value is ignored.",
 	},
 	"syslocation": schema.ListAttribute{
 		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "The physical location of the appliance. Second value is applicable only for HA pair. Otherwise second value is ignored.",
 	},
 	"sysname": schema.ListAttribute{
 		ElementType: types.StringType,
+		Optional:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "The FQDN (Fully Qualified Domain Name) of the appliance. Second value is applicable only for HA pair. Otherwise second value is ignored.",
 	},
 	"trap_receivers": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MembersnmpsettingTrapReceiversResourceSchemaAttributes,
 		},
+		Computed: true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "A list of trap receivers.",
 	},
 	"traps_community_string": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "A string the NIOS appliance sends to the management system together with its traps. Note that this community string must match exactly what you enter in the management system.",
 	},
 	"traps_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "If set to True, SNMP traps are enabled.",
 	},
 }
@@ -154,16 +163,16 @@ func (m *MemberSnmpSettingModel) Expand(ctx context.Context, diags *diag.Diagnos
 	to := &grid.MemberSnmpSetting{
 		QueriesCommunityString: flex.ExpandStringPointer(m.QueriesCommunityString),
 		QueriesEnable:          flex.ExpandBoolPointer(m.QueriesEnable),
-		Snmpv3QueriesEnable:    flex.ExpandBoolPointer(m.Snmpv3QueriesEnable),
-		Snmpv3QueriesUsers:     flex.ExpandFrameworkListNestedBlock(ctx, m.Snmpv3QueriesUsers, diags, ExpandMembersnmpsettingSnmpv3QueriesUsers),
-		Snmpv3TrapsEnable:      flex.ExpandBoolPointer(m.Snmpv3TrapsEnable),
-		Syscontact:             flex.ExpandFrameworkListString(ctx, m.Syscontact, diags),
-		Sysdescr:               flex.ExpandFrameworkListString(ctx, m.Sysdescr, diags),
-		Syslocation:            flex.ExpandFrameworkListString(ctx, m.Syslocation, diags),
-		Sysname:                flex.ExpandFrameworkListString(ctx, m.Sysname, diags),
-		TrapReceivers:          flex.ExpandFrameworkListNestedBlock(ctx, m.TrapReceivers, diags, ExpandMembersnmpsettingTrapReceivers),
-		TrapsCommunityString:   flex.ExpandStringPointer(m.TrapsCommunityString),
-		TrapsEnable:            flex.ExpandBoolPointer(m.TrapsEnable),
+		Snmpv3QueriesEnable:  flex.ExpandBoolPointer(m.Snmpv3QueriesEnable),
+		Snmpv3QueriesUsers: flex.ExpandFrameworkListNestedBlock(ctx, m.Snmpv3QueriesUsers, diags, ExpandMembersnmpsettingSnmpv3QueriesUsers),
+		Snmpv3TrapsEnable:    flex.ExpandBoolPointer(m.Snmpv3TrapsEnable),
+		Syscontact:           flex.ExpandFrameworkListString(ctx, m.Syscontact, diags),
+		Sysdescr:             flex.ExpandFrameworkListString(ctx, m.Sysdescr, diags),
+		Syslocation:          flex.ExpandFrameworkListString(ctx, m.Syslocation, diags),
+		Sysname:              flex.ExpandFrameworkListString(ctx, m.Sysname, diags),
+		TrapReceivers:        flex.ExpandFrameworkListNestedBlock(ctx, m.TrapReceivers, diags, ExpandMembersnmpsettingTrapReceivers),
+		TrapsCommunityString: flex.ExpandStringPointer(m.TrapsCommunityString),
+		TrapsEnable:          flex.ExpandBoolPointer(m.TrapsEnable),
 	}
 	return to
 }
@@ -188,15 +197,15 @@ func (m *MemberSnmpSettingModel) Flatten(ctx context.Context, from *grid.MemberS
 	}
 	m.EngineId = flex.FlattenFrameworkListString(ctx, from.EngineId, diags)
 	m.QueriesCommunityString = flex.FlattenStringPointer(from.QueriesCommunityString)
-	m.QueriesEnable = types.BoolPointerValue(from.QueriesEnable)
-	m.Snmpv3QueriesEnable = types.BoolPointerValue(from.Snmpv3QueriesEnable)
+	//m.QueriesEnable = types.BoolPointerValue(from.QueriesEnable)
+	//m.Snmpv3QueriesEnable = types.BoolPointerValue(from.Snmpv3QueriesEnable)
 	m.Snmpv3QueriesUsers = flex.FlattenFrameworkListNestedBlock(ctx, from.Snmpv3QueriesUsers, MembersnmpsettingSnmpv3QueriesUsersAttrTypes, diags, FlattenMembersnmpsettingSnmpv3QueriesUsers)
-	m.Snmpv3TrapsEnable = types.BoolPointerValue(from.Snmpv3TrapsEnable)
+	//m.Snmpv3TrapsEnable = types.BoolPointerValue(from.Snmpv3TrapsEnable)
 	m.Syscontact = flex.FlattenFrameworkListString(ctx, from.Syscontact, diags)
 	m.Sysdescr = flex.FlattenFrameworkListString(ctx, from.Sysdescr, diags)
 	m.Syslocation = flex.FlattenFrameworkListString(ctx, from.Syslocation, diags)
 	m.Sysname = flex.FlattenFrameworkListString(ctx, from.Sysname, diags)
 	m.TrapReceivers = flex.FlattenFrameworkListNestedBlock(ctx, from.TrapReceivers, MembersnmpsettingTrapReceiversAttrTypes, diags, FlattenMembersnmpsettingTrapReceivers)
 	m.TrapsCommunityString = flex.FlattenStringPointer(from.TrapsCommunityString)
-	m.TrapsEnable = types.BoolPointerValue(from.TrapsEnable)
+	//m.TrapsEnable = types.BoolPointerValue(from.TrapsEnable)
 }

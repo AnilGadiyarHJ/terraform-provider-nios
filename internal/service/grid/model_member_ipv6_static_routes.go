@@ -3,6 +3,7 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -15,19 +16,21 @@ import (
 )
 
 type MemberIpv6StaticRoutesModel struct {
-	Address types.String `tfsdk:"address"`
-	Cidr    types.Int64  `tfsdk:"cidr"`
-	Gateway types.String `tfsdk:"gateway"`
+	Address iptypes.IPv6Address `tfsdk:"address"`
+	Cidr    types.Int64         `tfsdk:"cidr"`
+	Gateway types.String        `tfsdk:"gateway"`
 }
 
 var MemberIpv6StaticRoutesAttrTypes = map[string]attr.Type{
-	"address": types.StringType,
+	"address": iptypes.IPv6AddressType{},
 	"cidr":    types.Int64Type,
 	"gateway": types.StringType,
 }
 
 var MemberIpv6StaticRoutesResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPv6AddressType{},
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "IPv6 address.",
 	},
@@ -36,6 +39,7 @@ var MemberIpv6StaticRoutesResourceSchemaAttributes = map[string]schema.Attribute
 		MarkdownDescription: "IPv6 CIDR",
 	},
 	"gateway": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Gateway address.",
 	},
@@ -58,7 +62,7 @@ func (m *MemberIpv6StaticRoutesModel) Expand(ctx context.Context, diags *diag.Di
 		return nil
 	}
 	to := &grid.MemberIpv6StaticRoutes{
-		Address: flex.ExpandStringPointer(m.Address),
+		Address: flex.ExpandIPv6Address(m.Address),
 		Cidr:    flex.ExpandInt64Pointer(m.Cidr),
 		Gateway: flex.ExpandStringPointer(m.Gateway),
 	}
@@ -83,7 +87,7 @@ func (m *MemberIpv6StaticRoutesModel) Flatten(ctx context.Context, from *grid.Me
 	if m == nil {
 		*m = MemberIpv6StaticRoutesModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPv6Address(from.Address)
 	m.Cidr = flex.FlattenInt64Pointer(from.Cidr)
 	m.Gateway = flex.FlattenStringPointer(from.Gateway)
 }

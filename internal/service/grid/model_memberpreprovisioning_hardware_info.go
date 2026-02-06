@@ -3,9 +3,11 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -24,7 +26,10 @@ var MemberpreprovisioningHardwareInfoAttrTypes = map[string]attr.Type{
 
 var MemberpreprovisioningHardwareInfoResourceSchemaAttributes = map[string]schema.Attribute{
 	"hwtype": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("CP-V1405", "CP-V2205", "CP-V805", "IB-1415", "IB-1425", "IB-1516", "IB-1526", "IB-2215", "IB-2225", "IB-2326", "IB-4015", "IB-4025", "IB-4126", "IB-815", "IB-825", "IB-926", "IB-FLEX", "IB-V1415", "IB-V1425", "IB-V1516", "IB-V1526", "IB-V2215", "IB-V2225", "IB-V2326", "IB-V4015", "IB-V4025", "IB-V4126", "IB-V815", "IB-V825", "IB-V926"),
+		},
 		MarkdownDescription: "Hardware type.",
 	},
 }

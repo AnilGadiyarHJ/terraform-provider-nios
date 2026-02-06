@@ -32,10 +32,12 @@ var MemberntpsettingNtpKeysResourceSchemaAttributes = map[string]schema.Attribut
 		MarkdownDescription: "The NTP authentication key identifier.",
 	},
 	"string": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The NTP authentication key string.",
 	},
 	"type": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The NTP authentication key type.",
 	},

@@ -14,6 +14,7 @@ import (
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MemberPreProvisioningModel struct {
@@ -31,18 +32,19 @@ var MemberPreProvisioningResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberpreprovisioningHardwareInfoResourceSchemaAttributes,
 		},
+		Required: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "An array of structures that describe the hardware being pre-provisioned.",
 	},
 	"licenses": schema.ListAttribute{
 		ElementType: types.StringType,
+		Required:    true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			customvalidator.StringsInSlice([]string{"cloud_api", "dhcp", "dns", "dtc", "enterprise", "fireeye", "ms_management", "nios", "rpz", "sw_tp", "tp_sub", "vnios"}),
 		},
-		Optional:            true,
 		MarkdownDescription: "An array of license types the pre-provisioned member should have in order to join the Grid, or the licenses that must be allocated to the member when it joins the Grid using the token-based authentication.",
 	},
 }

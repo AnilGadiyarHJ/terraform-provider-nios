@@ -3,9 +3,12 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -15,19 +18,19 @@ import (
 )
 
 type MemberVipSettingModel struct {
-	Address       types.String `tfsdk:"address"`
-	Gateway       types.String `tfsdk:"gateway"`
-	SubnetMask    types.String `tfsdk:"subnet_mask"`
-	VlanId        types.Int64  `tfsdk:"vlan_id"`
-	Primary       types.Bool   `tfsdk:"primary"`
-	Dscp          types.Int64  `tfsdk:"dscp"`
-	LanSubnetMask types.String `tfsdk:"lan_subnet_mask"`
-	LanGateway    types.String `tfsdk:"lan_gateway"`
-	UseDscp       types.Bool   `tfsdk:"use_dscp"`
+	Address       iptypes.IPv4Address `tfsdk:"address"`
+	Gateway       types.String        `tfsdk:"gateway"`
+	SubnetMask    types.String        `tfsdk:"subnet_mask"`
+	VlanId        types.Int64         `tfsdk:"vlan_id"`
+	Primary       types.Bool          `tfsdk:"primary"`
+	Dscp          types.Int64         `tfsdk:"dscp"`
+	LanSubnetMask types.String        `tfsdk:"lan_subnet_mask"`
+	LanGateway    types.String        `tfsdk:"lan_gateway"`
+	UseDscp       types.Bool          `tfsdk:"use_dscp"`
 }
 
 var MemberVipSettingAttrTypes = map[string]attr.Type{
-	"address":         types.StringType,
+	"address":         iptypes.IPv4AddressType{},
 	"gateway":         types.StringType,
 	"subnet_mask":     types.StringType,
 	"vlan_id":         types.Int64Type,
@@ -40,14 +43,18 @@ var MemberVipSettingAttrTypes = map[string]attr.Type{
 
 var MemberVipSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid Member.",
 	},
 	"gateway": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The default gateway for the Grid Member.",
 	},
 	"subnet_mask": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The subnet mask for the Grid Member.",
 	},
@@ -57,22 +64,33 @@ var MemberVipSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"primary": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if the current address is the primary VLAN address or not.",
 	},
 	"dscp": schema.Int64Attribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  int64default.StaticInt64(0),
+		// Validators: []validator.Int64{
+		// 	int64validator.AlsoRequires(path.MatchRoot("use_dscp")),
+		// },
 		MarkdownDescription: "The DSCP (Differentiated Services Code Point) value determines relative priorities for the type of services on your network. The appliance implements QoS (Quality of Service) rules based on this configuration. Valid values are from 0 to 63.",
 	},
 	"lan_subnet_mask": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "LAN netmask only for GCP HA.",
 	},
 	"lan_gateway": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "LAN gateway only for GCP HA.",
 	},
 	"use_dscp": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: dscp",
 	},
 }
@@ -94,7 +112,7 @@ func (m *MemberVipSettingModel) Expand(ctx context.Context, diags *diag.Diagnost
 		return nil
 	}
 	to := &grid.MemberVipSetting{
-		Address:       flex.ExpandStringPointer(m.Address),
+		Address:       flex.ExpandIPv4Address(m.Address),
 		Gateway:       flex.ExpandStringPointer(m.Gateway),
 		SubnetMask:    flex.ExpandStringPointer(m.SubnetMask),
 		VlanId:        flex.ExpandInt64Pointer(m.VlanId),
@@ -125,7 +143,7 @@ func (m *MemberVipSettingModel) Flatten(ctx context.Context, from *grid.MemberVi
 	if m == nil {
 		*m = MemberVipSettingModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPv4Address(from.Address)
 	m.Gateway = flex.FlattenStringPointer(from.Gateway)
 	m.SubnetMask = flex.FlattenStringPointer(from.SubnetMask)
 	m.VlanId = flex.FlattenInt64Pointer(from.VlanId)

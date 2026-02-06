@@ -3,9 +3,13 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -35,26 +39,44 @@ var MemberCspMemberSettingAttrTypes = map[string]attr.Type{
 var MemberCspMemberSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"use_csp_join_token": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Overrides grid join token",
 	},
 	"use_csp_dns_resolver": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Overrides CSP DNS Resolver",
 	},
 	"use_csp_https_proxy": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Overrides grid https proxy",
 	},
 	"csp_join_token": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_csp_join_token")),
+		},
 		MarkdownDescription: "Join token required to connect to a cluster",
 	},
 	"csp_dns_resolver": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_csp_dns_resolver")),
+		},
 		MarkdownDescription: "IP address of DNS resolver in DFP",
 	},
 	"csp_https_proxy": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.AlsoRequires(path.MatchRoot("use_csp_https_proxy")),
+		},
 		MarkdownDescription: "HTTP Proxy IP address of CSP Portal",
 	},
 }

@@ -3,9 +3,12 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -28,15 +31,23 @@ var MemberTrapNotificationsAttrTypes = map[string]attr.Type{
 
 var MemberTrapNotificationsResourceSchemaAttributes = map[string]schema.Attribute{
 	"trap_type": schema.StringAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true, //https://infoblox.atlassian.net/browse/NIOS-109172
+		Validators: []validator.String{
+			stringvalidator.OneOf("AnalyticsRPZ", "AutomatedTrafficCapture", "BFD", "BGP", "Backup", "CPU", "CaptivePortal", "CiscoISEServer", "Clear", "CloudAPI", "CloudDNSsync", "Cluster", "Controld", "DHCP", "DNS", "DNSAttack", "DNSIntegrityCheck", "DNSIntegrityCheckConnection", "Database", "DisconnectedGrid", "Discovery", "DiscoveryConflict", "DiscoveryUnmanaged", "Disk", "DuplicateIP", "ENAT", "FDUsage", "FTP", "Fan", "HA", "HAOnCloud", "HSM", "HTTP", "IFMAP", "IMC", "IMCGRPCServer", "IPAMUtilization", "IPMIDevice", "LCD", "LDAPServers", "License", "Login", "MGM", "MSServer", "Memory", "NTP", "Network", "OCSPResponders", "OSPF", "OSPF6", "Outbound", "PowerSupply", "RAID", "RIRSWIP", "RPZHitRate", "RecursiveClients", "Reporting", "RootFS", "SNMP", "SSH", "SerialConsole", "SwapUsage", "Syslog", "System", "TFTP", "Taxii", "ThreatInsight", "ThreatProtection", "TmpFS"),
+		},
 		MarkdownDescription: "Determines the type of a given trap.",
 	},
 	"enable_email": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the email notifications for the given trap are enabled or not.",
 	},
 	"enable_trap": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if the trap is enabled or not.",
 	},
 }

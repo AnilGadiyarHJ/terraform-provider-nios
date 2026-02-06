@@ -34,6 +34,7 @@ var MemberntpsettingNtpServersAttrTypes = map[string]attr.Type{
 
 var MemberntpsettingNtpServersResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The NTP server IP address or FQDN.",
 	},

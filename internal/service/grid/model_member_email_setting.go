@@ -6,12 +6,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MemberEmailSettingModel struct {
@@ -41,38 +45,58 @@ var MemberEmailSettingAttrTypes = map[string]attr.Type{
 var MemberEmailSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if email notification is enabled or not.",
 	},
 	"from_address": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The email address of a Grid Member for 'from' field in notification.",
 	},
 	"address": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The notification email address of a Grid member.",
 	},
 	"relay_enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if email relay is enabled or not.",
 	},
 	"relay": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The relay name or IP address.",
 	},
 	"password": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "Password to validate from address",
 	},
 	"smtps": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "SMTP over TLS",
 	},
 	"port_number": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(25),
 		MarkdownDescription: "SMTP port number",
 	},
 	"use_authentication": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable or disable SMTP auth",
 	},
 }
@@ -130,7 +154,6 @@ func (m *MemberEmailSettingModel) Flatten(ctx context.Context, from *grid.Member
 	m.Address = flex.FlattenStringPointer(from.Address)
 	m.RelayEnabled = types.BoolPointerValue(from.RelayEnabled)
 	m.Relay = flex.FlattenStringPointer(from.Relay)
-	m.Password = flex.FlattenStringPointer(from.Password)
 	m.Smtps = types.BoolPointerValue(from.Smtps)
 	m.PortNumber = flex.FlattenInt64Pointer(from.PortNumber)
 	m.UseAuthentication = types.BoolPointerValue(from.UseAuthentication)

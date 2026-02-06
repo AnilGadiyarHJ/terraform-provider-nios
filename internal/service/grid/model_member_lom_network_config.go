@@ -3,6 +3,7 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-nettypes/iptypes"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -15,14 +16,14 @@ import (
 )
 
 type MemberLomNetworkConfigModel struct {
-	Address      types.String `tfsdk:"address"`
-	Gateway      types.String `tfsdk:"gateway"`
-	SubnetMask   types.String `tfsdk:"subnet_mask"`
-	IsLomCapable types.Bool   `tfsdk:"is_lom_capable"`
+	Address      iptypes.IPv4Address `tfsdk:"address"`
+	Gateway      types.String        `tfsdk:"gateway"`
+	SubnetMask   types.String        `tfsdk:"subnet_mask"`
+	IsLomCapable types.Bool          `tfsdk:"is_lom_capable"`
 }
 
 var MemberLomNetworkConfigAttrTypes = map[string]attr.Type{
-	"address":        types.StringType,
+	"address":        iptypes.IPv4AddressType{},
 	"gateway":        types.StringType,
 	"subnet_mask":    types.StringType,
 	"is_lom_capable": types.BoolType,
@@ -30,14 +31,18 @@ var MemberLomNetworkConfigAttrTypes = map[string]attr.Type{
 
 var MemberLomNetworkConfigResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		CustomType:          iptypes.IPv4AddressType{},
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The IPv4 Address of the Grid member.",
 	},
 	"gateway": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The default gateway for the Grid member.",
 	},
 	"subnet_mask": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The subnet mask for the Grid member.",
 	},
@@ -64,7 +69,7 @@ func (m *MemberLomNetworkConfigModel) Expand(ctx context.Context, diags *diag.Di
 		return nil
 	}
 	to := &grid.MemberLomNetworkConfig{
-		Address:    flex.ExpandStringPointer(m.Address),
+		Address:    flex.ExpandIPv4Address(m.Address),
 		Gateway:    flex.ExpandStringPointer(m.Gateway),
 		SubnetMask: flex.ExpandStringPointer(m.SubnetMask),
 	}
@@ -89,7 +94,7 @@ func (m *MemberLomNetworkConfigModel) Flatten(ctx context.Context, from *grid.Me
 	if m == nil {
 		*m = MemberLomNetworkConfigModel{}
 	}
-	m.Address = flex.FlattenStringPointer(from.Address)
+	m.Address = flex.FlattenIPv4Address(from.Address)
 	m.Gateway = flex.FlattenStringPointer(from.Gateway)
 	m.SubnetMask = flex.FlattenStringPointer(from.SubnetMask)
 	m.IsLomCapable = types.BoolPointerValue(from.IsLomCapable)

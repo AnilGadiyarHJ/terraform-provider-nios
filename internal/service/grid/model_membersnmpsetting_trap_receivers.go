@@ -3,15 +3,19 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MembersnmpsettingTrapReceiversModel struct {
@@ -28,15 +32,23 @@ var MembersnmpsettingTrapReceiversAttrTypes = map[string]attr.Type{
 
 var MembersnmpsettingTrapReceiversResourceSchemaAttributes = map[string]schema.Attribute{
 	"address": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The address of the trap receiver.",
 	},
 	"user": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The SNMPv3 user for this trap receiver.",
 	},
 	"comment": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString(""),
+		Validators: []validator.String{
+			stringvalidator.LengthBetween(0, 256),
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "A descriptive comment for this trap receiver.",
 	},
 }

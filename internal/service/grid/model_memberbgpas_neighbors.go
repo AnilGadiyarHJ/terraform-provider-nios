@@ -3,9 +3,14 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -44,47 +49,65 @@ var MemberbgpasNeighborsAttrTypes = map[string]attr.Type{
 
 var MemberbgpasNeighborsResourceSchemaAttributes = map[string]schema.Attribute{
 	"interface": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("LAN_HA"),
+		},
 		MarkdownDescription: "The interface that sends BGP advertisement information.",
 	},
 	"neighbor_ip": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The IP address of the BGP neighbor.",
 	},
 	"remote_as": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The remote AS number of the BGP neighbor.",
 	},
 	"authentication_mode": schema.StringAttribute{
-		Optional:            true,
+		Required: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("MD5", "NONE"),
+		},
 		MarkdownDescription: "The BGP authentication mode.",
 	},
 	"bgp_neighbor_pass": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The password for a BGP neighbor. This is required only if authentication_mode is set to \"MD5\". When the password is entered, the value is preserved even if authentication_mode is changed to \"NONE\". This is a write-only attribute.",
 	},
 	"comment": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "User comments for this BGP neighbor.",
 	},
 	"multihop": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the multi-hop support is enabled or not.",
 	},
 	"multihop_ttl": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(255),
 		MarkdownDescription: "The Time To Live (TTL) value for multi-hop. Valid values are between 1 and 255.",
 	},
 	"bfd_template": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The BFD template name.",
 	},
 	"enable_bfd": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if BFD is enabled or not.",
 	},
 	"enable_bfd_dnscheck": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "Determines if BFD internal DNS monitor is enabled or not.",
 	},
 }

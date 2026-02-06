@@ -3,9 +3,13 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -33,6 +37,8 @@ var MemberTrafficCaptureAuthDnsSettingAttrTypes = map[string]attr.Type{
 var MemberTrafficCaptureAuthDnsSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"auth_dns_latency_trigger_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enabling trigger automated traffic capture based on authoritative DNS latency.",
 	},
 	"auth_dns_latency_threshold": schema.Int64Attribute{
@@ -44,10 +50,16 @@ var MemberTrafficCaptureAuthDnsSettingResourceSchemaAttributes = map[string]sche
 		MarkdownDescription: "Authoritative DNS latency above which traffic capture will stopped.",
 	},
 	"auth_dns_latency_listen_on_source": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("VIP_V4"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("IP", "LAN2_V4", "LAN2_V6", "MGMT_V4", "MGMT_V6", "VIP_V4", "VIP_V6"),
+		},
 		MarkdownDescription: "The local IP DNS service is listen on (for authoritative DNS latency trigger).",
 	},
 	"auth_dns_latency_listen_on_ip": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The DNS listen-on IP address used if auth_dns_latency_on_source is IP.",
 	},

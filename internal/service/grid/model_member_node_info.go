@@ -57,10 +57,10 @@ var MemberNodeInfoResourceSchemaAttributes = map[string]schema.Attribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MembernodeinfoServiceStatusResourceSchemaAttributes,
 		},
+		Computed: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "The service status list of the Grid Member.",
 	},
 	"physical_oid": schema.StringAttribute{
@@ -96,28 +96,39 @@ var MemberNodeInfoResourceSchemaAttributes = map[string]schema.Attribute{
 		MarkdownDescription: "True if node is Paid NIOS.",
 	},
 	"mgmt_network_setting": schema.SingleNestedAttribute{
-		Attributes: MembernodeinfoMgmtNetworkSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MembernodeinfoMgmtNetworkSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "Network settings for the MGMT port of the node.",
 	},
 	"lan_ha_port_setting": schema.SingleNestedAttribute{
-		Attributes: MembernodeinfoLanHaPortSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MembernodeinfoLanHaPortSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "LAN/HA port settings for the node.",
 	},
 	"mgmt_physical_setting": schema.SingleNestedAttribute{
-		Attributes: MembernodeinfoMgmtPhysicalSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MembernodeinfoMgmtPhysicalSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "Physical port settings for the MGMT interface.",
 	},
 	"lan2_physical_setting": schema.SingleNestedAttribute{
-		Attributes: MembernodeinfoLan2PhysicalSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MembernodeinfoLan2PhysicalSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "Physical port settings for the LAN2 interface.",
 	},
 	"nat_external_ip": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The NAT external IP address for the node.",
 	},
 	"v6_mgmt_network_setting": schema.SingleNestedAttribute{
-		Attributes: MembernodeinfoV6MgmtNetworkSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MembernodeinfoV6MgmtNetworkSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "The network settings for the IPv6 MGMT port of the node.",
 	},
 }
 
@@ -138,7 +149,6 @@ func (m *MemberNodeInfoModel) Expand(ctx context.Context, diags *diag.Diagnostic
 		return nil
 	}
 	to := &grid.MemberNodeInfo{
-		ServiceStatus:        flex.ExpandFrameworkListNestedBlock(ctx, m.ServiceStatus, diags, ExpandMembernodeinfoServiceStatus),
 		MgmtNetworkSetting:   ExpandMembernodeinfoMgmtNetworkSetting(ctx, m.MgmtNetworkSetting, diags),
 		LanHaPortSetting:     ExpandMembernodeinfoLanHaPortSetting(ctx, m.LanHaPortSetting, diags),
 		MgmtPhysicalSetting:  ExpandMembernodeinfoMgmtPhysicalSetting(ctx, m.MgmtPhysicalSetting, diags),

@@ -3,9 +3,11 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -29,14 +31,23 @@ var MembernodeinfoLan2PhysicalSettingAttrTypes = map[string]attr.Type{
 var MembernodeinfoLan2PhysicalSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"auto_port_setting_enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Enable or disalbe the auto port setting.",
 	},
 	"speed": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("10", "100", "1000"),
+		},
 		MarkdownDescription: "The port speed; if speed is 1000, duplex is FULL.",
 	},
 	"duplex": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			stringvalidator.OneOf("FULL", "HALF"),
+		},
 		MarkdownDescription: "The port duplex; if speed is 1000, duplex must be FULL.",
 	},
 }

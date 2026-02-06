@@ -3,15 +3,21 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MemberExternalSyslogBackupServersModel struct {
@@ -36,31 +42,46 @@ var MemberExternalSyslogBackupServersAttrTypes = map[string]attr.Type{
 
 var MemberExternalSyslogBackupServersResourceSchemaAttributes = map[string]schema.Attribute{
 	"address_or_fqdn": schema.StringAttribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The IPv4 or IPv6 address or FQDN of the backup syslog server.",
 	},
 	"directory_path": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The directory path for the replication of the rotated syslog files.",
 	},
 	"enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true),
 		MarkdownDescription: "If set to True, the syslog backup server is enabled.",
 	},
 	"password": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "The password of the backup syslog server.",
 	},
 	"port": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(22),
 		MarkdownDescription: "The port used to connect to the backup syslog server.",
 	},
 	"protocol": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("SCP"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("FTP", "SCP"),
+		},
 		MarkdownDescription: "The transport protocol used to connect to the backup syslog server.",
 	},
 	"username": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The username of the backup syslog server.",
 	},
 }
@@ -114,7 +135,6 @@ func (m *MemberExternalSyslogBackupServersModel) Flatten(ctx context.Context, fr
 	m.AddressOrFqdn = flex.FlattenStringPointer(from.AddressOrFqdn)
 	m.DirectoryPath = flex.FlattenStringPointer(from.DirectoryPath)
 	m.Enable = types.BoolPointerValue(from.Enable)
-	m.Password = flex.FlattenStringPointer(from.Password)
 	m.Port = flex.FlattenInt64Pointer(from.Port)
 	m.Protocol = flex.FlattenStringPointer(from.Protocol)
 	m.Username = flex.FlattenStringPointer(from.Username)

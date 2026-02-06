@@ -3,9 +3,13 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -37,30 +41,47 @@ var MemberAdditionalIpListAttrTypes = map[string]attr.Type{
 var MemberAdditionalIpListResourceSchemaAttributes = map[string]schema.Attribute{
 	"anycast": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if anycast for the Interface object is enabled or not.",
 	},
 	"ipv4_network_setting": schema.SingleNestedAttribute{
-		Attributes: MemberadditionaliplistIpv4NetworkSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MemberadditionaliplistIpv4NetworkSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "The IPv4 network settings of the Grid Member.",
 	},
 	"ipv6_network_setting": schema.SingleNestedAttribute{
-		Attributes: MemberadditionaliplistIpv6NetworkSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          MemberadditionaliplistIpv6NetworkSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "The IPv6 network settings of the Grid Member.",
 	},
 	"comment": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
+		Default:             stringdefault.StaticString(""),
 		MarkdownDescription: "A descriptive comment of this structure.",
 	},
 	"enable_bgp": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the BGP advertisement setting is enabled for this interface or not.",
 	},
 	"enable_ospf": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if the OSPF advertisement setting is enabled for this interface or not.",
 	},
 	"interface": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Default:  stringdefault.StaticString("LOOPBACK"),
+		Validators: []validator.String{
+			stringvalidator.OneOf("LAN2", "LAN_HA", "LOOPBACK", "MGMT"),
+		},
 		MarkdownDescription: "The interface type for the Interface object.",
 	},
 }

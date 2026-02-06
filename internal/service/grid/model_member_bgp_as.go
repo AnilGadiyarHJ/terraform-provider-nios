@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -34,29 +36,36 @@ var MemberBgpAsAttrTypes = map[string]attr.Type{
 
 var MemberBgpAsResourceSchemaAttributes = map[string]schema.Attribute{
 	"as": schema.Int64Attribute{
-		Optional:            true,
+		Required:            true,
 		MarkdownDescription: "The number of this autonomous system.",
 	},
 	"keepalive": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(4),
 		MarkdownDescription: "The AS keepalive timer (in seconds). The valid value is from 1 to 21845.",
 	},
 	"holddown": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(16),
 		MarkdownDescription: "The AS holddown timer (in seconds). The valid value is from 3 to 65535.",
 	},
 	"neighbors": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberbgpasNeighborsResourceSchemaAttributes,
 		},
+		Computed: true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
 		},
-		Optional:            true,
 		MarkdownDescription: "The BGP neighbors for this AS.",
 	},
 	"link_detect": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if link detection on the interface is enabled or not.",
 	},
 }

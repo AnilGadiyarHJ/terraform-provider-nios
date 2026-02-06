@@ -3,10 +3,15 @@ package grid
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -53,70 +58,104 @@ var MemberNtpSettingAttrTypes = map[string]attr.Type{
 var MemberNtpSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enable_ntp": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether the NTP service is enabled on the member.",
 	},
 	"ntp_servers": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberntpsettingNtpServersResourceSchemaAttributes,
 		},
+		Computed: true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("use_ntp_servers")),
 		},
-		Optional:            true,
 		MarkdownDescription: "The list of NTP servers configured on a member.",
 	},
 	"ntp_keys": schema.ListNestedAttribute{
 		NestedObject: schema.NestedAttributeObject{
 			Attributes: MemberntpsettingNtpKeysResourceSchemaAttributes,
 		},
+		Computed: true,
+		Optional: true,
 		Validators: []validator.List{
 			listvalidator.SizeAtLeast(1),
+			listvalidator.AlsoRequires(path.MatchRoot("use_ntp_keys")),
 		},
-		Optional:            true,
 		MarkdownDescription: "The list of NTP authentication keys used to authenticate NTP clients.",
 	},
 	"ntp_acl": schema.SingleNestedAttribute{
 		Attributes: MemberntpsettingNtpAclResourceSchemaAttributes,
+		Computed:   true,
 		Optional:   true,
+		Validators: []validator.Object{
+			objectvalidator.AlsoRequires(path.MatchRoot("use_ntp_acl")),
+		},
+		MarkdownDescription: "The NTP access control settings.",
 	},
 	"ntp_kod": schema.BoolAttribute{
-		Optional:            true,
+		Optional: true,
+		Computed: true,
+		Default:  booldefault.StaticBool(false),
+		Validators: []validator.Bool{
+			boolvalidator.AlsoRequires(path.MatchRoot("use_ntp_kod")),
+		},
 		MarkdownDescription: "Determines whether the Kiss-o'-Death packets are enabled or disabled.",
 	},
 	"enable_external_ntp_servers": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether the use of the external NTP servers is enabled for the member.",
 	},
 	"exclude_grid_master_ntp_server": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines whether the Grid Master is excluded as an NTP server.",
 	},
 	"use_local_ntp_stratum": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Override Grid level NTP stratum.",
 	},
 	"local_ntp_stratum": schema.Int64Attribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             int64default.StaticInt64(15),
 		MarkdownDescription: "Vnode level local NTP stratum.",
 	},
 	"use_default_stratum": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(true), //https://infoblox.atlassian.net/browse/NIOS-109173
 		MarkdownDescription: "Vnode level default stratum.",
 	},
 	"use_ntp_servers": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ntp_servers",
 	},
 	"use_ntp_keys": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ntp_keys",
 	},
 	"use_ntp_acl": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ntp_acl",
 	},
 	"use_ntp_kod": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Use flag for: ntp_kod",
 	},
 }

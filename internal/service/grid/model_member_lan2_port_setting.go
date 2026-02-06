@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -41,26 +42,38 @@ var MemberLan2PortSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	},
 	"enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "If this field is set to True, then it has its own IP settings. Otherwise, port redundancy mechanism is used, in which the LAN1 and LAN2 ports share the same IP settings for failover purposes.",
 	},
 	"network_setting": schema.SingleNestedAttribute{
-		Attributes: Memberlan2portsettingNetworkSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          Memberlan2portsettingNetworkSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "If the ‘enable’ field is set to True, this defines IPv4 network settings for LAN2.",
 	},
 	"v6_network_setting": schema.SingleNestedAttribute{
-		Attributes: Memberlan2portsettingV6NetworkSettingResourceSchemaAttributes,
-		Optional:   true,
+		Attributes:          Memberlan2portsettingV6NetworkSettingResourceSchemaAttributes,
+		Computed:            true,
+		Optional:            true,
+		MarkdownDescription: "If the ‘enable’ field is set to True, this defines IPv6 network settings for the LAN2 port.",
 	},
 	"nic_failover_enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Determines if NIC failover is enabled or not.",
 	},
 	"nic_failover_enable_primary": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Prefer LAN1 when available.",
 	},
 	"default_route_failover_enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Default route failover for LAN1 and LAN2.",
 	},
 }

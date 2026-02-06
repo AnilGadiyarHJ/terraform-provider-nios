@@ -29,14 +29,17 @@ var MembernodeinfolanhaportsettingLanPortSettingAttrTypes = map[string]attr.Type
 var MembernodeinfolanhaportsettingLanPortSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"auto_port_setting_enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "Enable or disalbe the auto port setting.",
 	},
 	"speed": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The port speed; if speed is 1000, duplex is FULL.",
 	},
 	"duplex": schema.StringAttribute{
 		Optional:            true,
+		Computed:            true,
 		MarkdownDescription: "The port duplex; if speed is 1000, duplex must be FULL.",
 	},
 }

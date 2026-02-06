@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
@@ -31,6 +32,8 @@ var MemberTrafficCaptureChrSettingAttrTypes = map[string]attr.Type{
 var MemberTrafficCaptureChrSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"chr_trigger_enable": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(false),
 		MarkdownDescription: "Enable triggering automated traffic capture based on cache hit ratio thresholds.",
 	},
 	"chr_threshold": schema.Int64Attribute{

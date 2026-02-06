@@ -6,12 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
 	"github.com/infobloxopen/infoblox-nios-go-client/grid"
 
 	"github.com/infobloxopen/terraform-provider-nios/internal/flex"
+	customvalidator "github.com/infobloxopen/terraform-provider-nios/internal/validator"
 )
 
 type MemberNatSettingModel struct {
@@ -29,14 +31,20 @@ var MemberNatSettingAttrTypes = map[string]attr.Type{
 var MemberNatSettingResourceSchemaAttributes = map[string]schema.Attribute{
 	"enabled": schema.BoolAttribute{
 		Optional:            true,
+		Computed:            true, // making it computed as backend returns false
 		MarkdownDescription: "Determines if NAT should be enabled.",
 	},
 	"external_virtual_ip": schema.StringAttribute{
+		Computed:            true,
 		Optional:            true,
 		MarkdownDescription: "External IP address for NAT.",
 	},
 	"group": schema.StringAttribute{
-		Optional:            true,
+		Computed: true,
+		Optional: true,
+		Validators: []validator.String{
+			customvalidator.ValidateTrimmedString(),
+		},
 		MarkdownDescription: "The NAT group.",
 	},
 }
@@ -83,7 +91,7 @@ func (m *MemberNatSettingModel) Flatten(ctx context.Context, from *grid.MemberNa
 	if m == nil {
 		*m = MemberNatSettingModel{}
 	}
-	m.Enabled = types.BoolPointerValue(from.Enabled)
+	//m.Enabled = types.BoolPointerValue(from.Enabled)
 	m.ExternalVirtualIp = flex.FlattenStringPointer(from.ExternalVirtualIp)
 	m.Group = flex.FlattenStringPointer(from.Group)
 }
